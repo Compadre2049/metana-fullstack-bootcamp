@@ -1,0 +1,17 @@
+Start
+
+define = num1, oddCount
+input num1 = "what is the stopping number?"
+
+oddCount = 0
+
+For num from 1 to num1
+  if num MOD 2 != 0 THEN
+    oddCount = oddCount + 1
+  End if
+NEXT num
+
+answer = "The amount of odd numbers up to" + num1 + "is" + oddCount
+print answer
+
+End 

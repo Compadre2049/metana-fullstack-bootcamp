@@ -1,0 +1,9 @@
+Start
+
+define = num1, num2, answer
+input num1 = "What is the first number?"
+input num2 = "What is the second number?"
+answer = num1 * num2 
+print "The answer is:" + answer
+
+End

@@ -1,0 +1,43 @@
+Start
+
+DEFINE = num1, num2, num3, num4, num5, avg, min, max
+
+INPUT "Enter number 1:", num1
+INPUT "Enter number 2:", num2
+INPUT "Enter number 3:", num3
+INPUT "Enter number 4:", num4
+INPUT "Enter number 5:", num5
+
+avg = (num1 + num2 + num3 + num4 + num5) / 5.0
+
+min = num1
+IF num2 < min THEN 
+  min = num2
+ENDIF
+IF num3 < min THEN
+    min = num3
+ENDIF
+IF num4 < min THEN
+    min = num4
+ENDIF
+IF num5 < min THEN
+    min = num5
+ENDIF
+
+max = num1
+IF num2 > max THEN
+    max = num2
+ENDIF
+IF num3 > max THEN
+    max = num3
+ENDIF
+IF num4 > max THEN
+    max = num4
+ENDIF
+IF num5 > max THEN
+    max = num5
+ENDIF
+
+PRINT "The average of the 5 numbers is:", avg
+PRINT "The smallest (minimum) number is:", min
+PRINT "The largest (maximum) number is:", max

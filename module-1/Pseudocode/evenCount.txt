@@ -1,0 +1,16 @@
+Start
+
+define = num1, evenCount
+input num1 = "what is the stopping number?"
+
+evenCount = 0
+
+For num from 1 to num1
+  if num /= 2 then
+    evenCount = evenCount + 1
+  End if
+
+answer = "The amount of even numbers up to" + num1 + "is" + evenCount
+print answer
+
+End 
