@@ -1,0 +1,52 @@
+:root {
+  --primary-color: #5e1f99;
+  --secondary-color: #3eda30;
+}
+
+.input-control {
+  margin-bottom: 15px;
+  position: relative;
+}
+
+input {
+  width: 20%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.error {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+  position: absolute;
+  left: 0;
+  bottom: -20px;
+}
+
+button {
+  width: 10%;
+  padding: 10px;
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #4a1578;
+}
+
+@media (max-width: 600px) {
+  form {
+    padding: 15px;
+  }
+
+  input,
+  button {
+    font-size: 14px;
+  }
+}
