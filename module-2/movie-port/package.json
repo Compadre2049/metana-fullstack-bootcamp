@@ -1,0 +1,25 @@
+{
+  "name": "movie-port",
+  "version": "1.0.0",
+  "description": "movie recommendation website",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Compadre2049/metana-fullstack-bootcamp.git"
+  },
+  "author": "Nathan Obenchain",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Compadre2049/metana-fullstack-bootcamp/issues"
+  },
+  "homepage": "https://github.com/Compadre2049/metana-fullstack-bootcamp#readme",
+  "dependencies": {
+    "express": "^4.21.0",
+    "express-handlebars": "^8.0.1",
+    "nodemon": "^3.1.7"
+  },
+  "type": "module"
+}
