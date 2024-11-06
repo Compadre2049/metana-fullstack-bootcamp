@@ -3,6 +3,10 @@
 **/example.env
 node_modules/
 <<<<<<< HEAD
+=======
+**/build/
+>>>>>>> module-8
+<<<<<<< HEAD
 
 =======
 node_modules
