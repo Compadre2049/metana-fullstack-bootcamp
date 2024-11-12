@@ -7,8 +7,11 @@ function BlogPost() {
     const { id } = useParams();
 
     useEffect(() => {
+        const abortController = new AbortController();
 
-        fetch(`${process.env.REACT_APP_BACKEND_ORIGIN}/api/blogs/${id}`)
+        fetch(`${process.env.REACT_APP_BACKEND_ORIGIN}/api/blogs/${id}`, {
+            signal: abortController.signal
+        })
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -16,19 +19,24 @@ function BlogPost() {
                 return response.json();
             })
             .then(data => {
-                console.log('Fetched blog data:', data); // For debugging
+                console.log('Fetched blog data:', data);
                 setBlog(data);
             })
             .catch(error => {
-                console.error('Error fetching blog:', error);
-                setError('Failed to load blog post');
+                if (error.name !== 'AbortError') {
+                    console.error('Error fetching blog:', error);
+                    setError('Failed to load blog post');
+                }
             });
+
+        return () => {
+            abortController.abort();
+        };
     }, [id]);
 
     if (error) return <div className="text-red-500">{error}</div>;
     if (!blog) return <div className="text-gray-500">Loading...</div>;
 
-    // Format the date
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric',
