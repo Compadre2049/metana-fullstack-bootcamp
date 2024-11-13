@@ -76,7 +76,11 @@ function CreateBlog() {
             <h1 className="text-3xl font-bold mb-6">Create New Blog Post</h1>
 
             {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <div
+                    className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 error alert-error"
+                    role="alert"
+                    data-testid="error-message"
+                >
                     {error}
                 </div>
             )}

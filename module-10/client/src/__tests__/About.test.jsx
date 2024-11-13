@@ -8,14 +8,14 @@ describe('About Component', () => {
 
     test('renders the main heading', () => {
         const heading = screen.getByRole('heading', {
-            name: /about blogfrog/i,
+            name: /about blogwhale/i,
             level: 1
         });
         expect(heading).toBeInTheDocument();
     });
 
     test('renders the introduction paragraph', () => {
-        const intro = screen.getByText(/BlogFrog is a modern blogging platform/);
+        const intro = screen.getByText(/BlogWhale is a modern blogging platform/);
         expect(intro).toBeInTheDocument();
     });
 
@@ -53,11 +53,11 @@ describe('About Component', () => {
 
     test('applies correct CSS classes', () => {
         // Test container classes
-        const container = screen.getByRole('heading', { name: /about blogfrog/i }).parentElement;
+        const container = document.querySelector('.container');
         expect(container).toHaveClass('container', 'mx-auto', 'px-4', 'py-8', 'max-w-3xl');
 
         // Test heading classes
-        const mainHeading = screen.getByRole('heading', { name: /about blogfrog/i });
+        const mainHeading = screen.getByRole('heading', { name: /about blogwhale/i });
         expect(mainHeading).toHaveClass('text-3xl', 'font-bold', 'mb-6');
 
         // Test section headings
@@ -67,19 +67,28 @@ describe('About Component', () => {
         });
 
         // Test paragraphs
-        const paragraphs = screen.getAllByText(/.*/, { selector: 'p' });
+        const paragraphs = document.querySelectorAll('p');
         paragraphs.forEach(p => {
-            expect(p).toHaveClass('text-gray-700');
+            expect(p).toHaveClass('text-gray-700', 'mb-4');
         });
+
+        // Test feature list
+        const list = document.querySelector('ul');
+        expect(list).toHaveClass('list-disc', 'list-inside', 'text-gray-700', 'space-y-2');
     });
 
     test('renders all sections in correct order', () => {
-        const content = screen.getByRole('heading', { name: /about blogfrog/i }).parentElement;
-        const sections = content.getElementsByTagName('section');
-
+        const sections = document.querySelectorAll('section');
         expect(sections).toHaveLength(3);
-        expect(sections[0]).toHaveTextContent(/BlogFrog is a modern blogging platform/);
+
+        // Check content of each section
+        expect(sections[0]).toHaveTextContent(/BlogWhale is a modern blogging platform/);
         expect(sections[1]).toHaveTextContent(/Features/);
         expect(sections[2]).toHaveTextContent(/Our Mission/);
+
+        // Check section spacing
+        sections.forEach(section => {
+            expect(section).toHaveClass('mb-8');
+        });
     });
 }); 

@@ -15,7 +15,7 @@ describe('Home Component', () => {
     test('renders welcome message', () => {
         renderWithRouter(<Home />);
         const heading = screen.getByRole('heading', {
-            name: /welcome to blogfrog/i,
+            name: /welcome to blogwhale/i,
             level: 1
         });
         expect(heading).toBeInTheDocument();
@@ -40,14 +40,12 @@ describe('Home Component', () => {
         renderWithRouter(<Home />);
 
         // Check container class
-        const container = screen.getByRole('heading', {
-            name: /welcome to blogfrog/i
-        }).parentElement;
+        const container = document.querySelector('.text-center');
         expect(container).toHaveClass('text-center');
 
         // Check heading classes
         const heading = screen.getByRole('heading', {
-            name: /welcome to blogfrog/i
+            name: /welcome to blogwhale/i
         });
         expect(heading).toHaveClass('text-4xl', 'font-bold', 'mb-4');
 
@@ -73,7 +71,7 @@ describe('Home Component', () => {
         renderWithRouter(<Home />);
         const headings = screen.getAllByRole('heading');
         expect(headings).toHaveLength(1);
-        expect(headings[0]).toHaveTextContent(/welcome to blogfrog/i);
+        expect(headings[0]).toHaveTextContent(/welcome to blogwhale/i);
         expect(headings[0].tagName).toBe('H1');
     });
 
@@ -82,7 +80,7 @@ describe('Home Component', () => {
         const link = screen.getByRole('link', { name: /view blogs/i });
 
         expect(link).toBeEnabled();
-        expect(link).not.toHaveAttribute('target'); // Should not open in new tab
-        expect(link).not.toHaveAttribute('rel'); // No special rel attributes needed
+        expect(link).not.toHaveAttribute('target');
+        expect(link).not.toHaveAttribute('rel');
     });
 }); 

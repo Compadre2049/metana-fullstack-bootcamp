@@ -1,8 +1,4 @@
-// jest-dom adds custom jest matchers for asserting on DOM nodes.
 import '@testing-library/jest-dom';
-
-// Mock fetch API
-global.fetch = jest.fn();
 
 // Mock localStorage
 const localStorageMock = {
@@ -12,3 +8,9 @@ const localStorageMock = {
     clear: jest.fn()
 };
 global.localStorage = localStorageMock;
+
+// Mock fetch
+global.fetch = jest.fn();
+
+// Mock environment variables
+process.env.REACT_APP_BACKEND_ORIGIN = 'http://localhost:3001';

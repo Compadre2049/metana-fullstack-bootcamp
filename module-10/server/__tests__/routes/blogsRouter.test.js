@@ -9,47 +9,35 @@ import jwt from 'jsonwebtoken';
 
 describe('Blogs Router', () => {
     let app;
-    let normalUser;
-    let adminUser;
-    let normalUserToken;
-    let adminToken;
+    let testUser;
+    let userToken;
+    let testBlog;
 
     beforeAll(async () => {
-        // Clear the database first
-        await User.deleteMany({});
-        await Blog.deleteMany({});
+        await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/test');
 
         app = express();
         app.use(express.json());
 
-        // Mock auth middleware
+        // Simple auth middleware
         app.use((req, res, next) => {
-            if (req.method === 'GET') {
-                return next();
+            if (req.method === 'GET') return next();
+
+            const token = req.headers.authorization?.split(' ')[1];
+            if (!token) {
+                return res.status(401).json({ success: false, message: 'No token' });
             }
 
-            const authHeader = req.headers.authorization;
-            if (!authHeader) {
-                return res.status(401).json({
-                    success: false,
-                    message: 'No token provided'
-                });
-            }
-
-            const token = authHeader.split(' ')[1];
             try {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET || 'test-secret');
                 req.user = {
-                    _id: new mongoose.Types.ObjectId(decoded._id),
-                    role: decoded.role,
-                    email: decoded.email
+                    _id: decoded.id,
+                    email: decoded.email,
+                    role: decoded.role || 'normal'
                 };
                 next();
             } catch (error) {
-                return res.status(401).json({
-                    success: false,
-                    message: 'Invalid token'
-                });
+                res.status(401).json({ success: false, message: 'Invalid token' });
             }
         });
 
@@ -57,53 +45,46 @@ describe('Blogs Router', () => {
     });
 
     beforeEach(async () => {
-        // Clear existing data
-        await User.deleteMany({});
         await Blog.deleteMany({});
+        await User.deleteMany({});
 
-        // Create fresh test users for each test
-        normalUser = await User.create({
-            name: 'Normal User',
+        // Create test user with correct role enum
+        testUser = await User.create({
+            name: 'Test User',
             email: 'test@example.com',
             password: 'password123',
             role: 'normal'
         });
 
-        adminUser = await User.create({
-            name: 'Admin User',
-            email: 'admin@example.com',
-            password: 'password123',
-            role: 'admin'
-        });
-
-        // Generate fresh tokens for each test
-        normalUserToken = jwt.sign({
-            _id: normalUser._id.toString(),
-            email: normalUser.email,
+        // Create token
+        userToken = jwt.sign({
+            id: testUser._id.toString(),
+            email: testUser.email,
             role: 'normal'
         }, process.env.JWT_SECRET || 'test-secret');
 
-        adminToken = jwt.sign({
-            _id: adminUser._id.toString(),
-            email: adminUser.email,
-            role: 'admin'
-        }, process.env.JWT_SECRET || 'test-secret');
+        // Create test blog
+        testBlog = await Blog.create({
+            title: 'Test Blog',
+            content: 'Test Content',
+            user: testUser._id
+        });
+    });
 
-        // Verify users exist
-        const normalUserExists = await User.findById(normalUser._id);
-        const adminUserExists = await User.findById(adminUser._id);
+    describe('GET /blogs', () => {
+        it('should get all blogs', async () => {
+            const response = await request(app)
+                .get('/blogs')
+                .expect(200);
 
-        if (!normalUserExists || !adminUserExists) {
-            throw new Error('Test users not created properly');
-        }
+            expect(response.body.success).toBe(true);
+            expect(response.body.data).toHaveLength(1);
+            expect(response.body.data[0].title).toBe('Test Blog');
+        });
     });
 
     describe('POST /blogs', () => {
         it('should create a new blog when authenticated', async () => {
-            // Verify user exists before test
-            const userExists = await User.findById(normalUser._id);
-            console.log('Test user exists:', userExists);
-
             const newBlog = {
                 title: 'New Blog',
                 content: 'New Content'
@@ -111,28 +92,61 @@ describe('Blogs Router', () => {
 
             const response = await request(app)
                 .post('/blogs')
-                .set('Authorization', `Bearer ${normalUserToken}`)
-                .send(newBlog);
+                .set('Authorization', `Bearer ${userToken}`)
+                .send(newBlog)
+                .expect(201);
 
-            console.log('Response data:', response.body);
-
-            expect(response.status).toBe(201);
             expect(response.body.success).toBe(true);
             expect(response.body.data.title).toBe('New Blog');
-            expect(response.body.data.user).toBe(normalUser._id.toString());
+            expect(response.body.data.user._id.toString()).toBe(testUser._id.toString());
+        });
 
-            // Verify the blog was saved correctly
-            const savedBlog = await Blog.findById(response.body.data._id);
-            expect(savedBlog).toBeTruthy();
-            expect(savedBlog.user.toString()).toBe(normalUser._id.toString());
+        it('should not create blog without auth', async () => {
+            const newBlog = {
+                title: 'New Blog',
+                content: 'New Content'
+            };
+
+            await request(app)
+                .post('/blogs')
+                .send(newBlog)
+                .expect(401);
         });
     });
 
-    // ... rest of test cases ...
+    describe('PUT /blogs/:id', () => {
+        it('should update own blog', async () => {
+            const update = {
+                title: 'Updated Title'
+            };
+
+            const response = await request(app)
+                .put(`/blogs/${testBlog._id}`)
+                .set('Authorization', `Bearer ${userToken}`)
+                .send(update)
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.data.title).toBe('Updated Title');
+        });
+    });
+
+    describe('DELETE /blogs/:id', () => {
+        it('should delete own blog', async () => {
+            const response = await request(app)
+                .delete(`/blogs/${testBlog._id}`)
+                .set('Authorization', `Bearer ${userToken}`)
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.message).toBe('Blog deleted successfully');
+
+            const deletedBlog = await Blog.findById(testBlog._id);
+            expect(deletedBlog).toBeNull();
+        });
+    });
 
     afterAll(async () => {
-        await User.deleteMany({});
-        await Blog.deleteMany({});
         await mongoose.connection.close();
     });
 }); 

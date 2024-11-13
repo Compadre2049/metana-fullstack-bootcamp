@@ -3,11 +3,11 @@ import React from 'react';
 function About() {
     return (
         <div className="container mx-auto px-4 py-8 max-w-3xl">
-            <h1 className="text-3xl font-bold mb-6">About BlogFrog</h1>
+            <h1 className="text-3xl font-bold mb-6">About BlogWhale</h1>
 
             <section className="mb-8">
                 <p className="text-gray-700 mb-4">
-                    BlogFrog is a modern blogging platform that empowers writers and readers to connect through meaningful content.
+                    BlogWhale is a modern blogging platform that empowers writers and readers to connect through meaningful content.
                     Our platform provides a clean, intuitive interface for sharing ideas, stories, and knowledge.
                 </p>
             </section>
