@@ -1,14 +1,10 @@
 .DS_Store
-**/.env
+**/node_modules
+**/**/node_modules
 **/example.env
+**/**/.env
+**/.env
 node_modules/
-<<<<<<< HEAD
-=======
 **/build/
->>>>>>> module-8
-<<<<<<< HEAD
 
-=======
-node_modules
-example.env
->>>>>>> module-5
+

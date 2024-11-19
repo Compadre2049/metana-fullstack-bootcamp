@@ -9,13 +9,33 @@
     "build:frontend": "cd ../client && npm run build",
     "prod": "NODE_ENV=production node index.js",
     "dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest --detectOpenHandles --forceExit",
+    "test:watch": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest --watchAll --detectOpenHandles",
+    "test:coverage": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest --coverage --detectOpenHandles --forceExit",
     "seed": "node scripts/seedDb.js"
   },
   "type": "module",
+  "jest": {
+    "transform": {},
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
+    "setupFilesAfterEnv": [
+      "./__tests__/setup.js"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "testTimeout": 30000,
+    "injectGlobals": true
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fieldse/metana-fullstack-demos.git"
+    "url": "git+https://github.com/Compadre2049/metana-fullstack-bootcamp.git"
   },
   "keywords": [
     "rest",
@@ -34,6 +54,7 @@
   "dependencies": {
     "all": "^0.0.0",
     "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -46,6 +67,8 @@
     "validator": "^13.12.0"
   },
   "devDependencies": {
-    "concurrently": "^9.0.1"
+    "concurrently": "^9.0.1",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
   }
 }

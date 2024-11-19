@@ -4,22 +4,6 @@ import User from '../models/User.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// Temporary user storage (replace with database later)
-const users = [
-    {
-        email: 'admin@example.com',
-        // This will be the hashed version of "admin123"
-        password: await bcrypt.hash('admin123', 10),
-        isAdmin: true
-    },
-    {
-        email: 'user@example.com',
-        // This will be the hashed version of "user123"
-        password: await bcrypt.hash('user123', 10),
-        isAdmin: false
-    }
-];
-
 // Helper function to hash passwords
 const hashPassword = async (password) => {
     const saltRounds = 10;
@@ -28,7 +12,7 @@ const hashPassword = async (password) => {
 
 export const login = async (req, res) => {
     try {
-        console.log('Login request received:', req.body); // Log the request
+        console.log('Login request received:', req.body);
 
         const { email, password } = req.body;
 
@@ -40,7 +24,7 @@ export const login = async (req, res) => {
             });
         }
 
-        // Find user
+        // Find user in MongoDB
         const user = await User.findOne({ email });
         console.log('User lookup result:', user ? 'User found' : 'User not found');
 
@@ -62,22 +46,29 @@ export const login = async (req, res) => {
             });
         }
 
-        // Generate token
+        // Generate token with 1-hour expiration
         const token = jwt.sign(
             {
-                userId: user._id,
+                id: user._id,
                 email: user.email,
+                name: user.name,
                 role: user.role
             },
             process.env.JWT_SECRET,
-            { expiresIn: '24h' }
+            { expiresIn: '1h' }  // Token will expire in 1 hour
         );
 
-        console.log('Token generated:', token ? 'yes' : 'no'); // Debug log
+        console.log('Token generated:', token ? 'yes' : 'no');
 
         res.status(200).json({
             success: true,
-            token
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
         });
 
     } catch (error) {
@@ -89,38 +80,22 @@ export const login = async (req, res) => {
     }
 };
 
-export const logout = async (req, res) => {
-    try {
-        // Clear the session cookie
-        res.clearCookie('userSession');
-
-        res.status(200).json({
-            success: true,
-            message: 'Logout successful'
-        });
-    } catch (error) {
-        console.error('Logout error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error'
-        });
-    }
-};
-
-// Add registration method with password hashing
 export const register = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        console.log('Registration request received:', req.body);
 
-        if (!email || !password) {
+        const { name, email, password } = req.body;
+
+        if (!name || !email || !password) {
             return res.status(400).json({
                 success: false,
-                message: 'Please provide email and password'
+                message: 'Please provide name, email and password'
             });
         }
 
-        // Check if user already exists
-        if (users.find(u => u.email === email)) {
+        // Check if user already exists in MongoDB
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
             return res.status(400).json({
                 success: false,
                 message: 'User already exists'
@@ -130,13 +105,19 @@ export const register = async (req, res) => {
         // Hash password
         const hashedPassword = await hashPassword(password);
 
-        // Create new user
-        const newUser = {
+        // Create new user in MongoDB
+        // Only set role to admin if it's the admin email, otherwise default to user
+        const newUser = new User({
+            name,
             email,
-            password: hashedPassword
-        };
+            password: hashedPassword,
+            // The role will default to 'user' as defined in the User model
+            // Only override for admin email
+            ...(email === 'admin@example.com' && { role: 'admin' })
+        });
 
-        users.push(newUser);
+        await newUser.save();
+        console.log('New user created:', newUser.email);
 
         res.status(201).json({
             success: true,
@@ -145,6 +126,22 @@ export const register = async (req, res) => {
 
     } catch (error) {
         console.error('Registration error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+};
+
+export const logout = async (req, res) => {
+    try {
+        res.clearCookie('userSession');
+        res.status(200).json({
+            success: true,
+            message: 'Logout successful'
+        });
+    } catch (error) {
+        console.error('Logout error:', error);
         res.status(500).json({
             success: false,
             message: 'Internal server error'
