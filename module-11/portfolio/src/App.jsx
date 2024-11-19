@@ -4,17 +4,15 @@ import { router } from "./routes/Router";
 import Navbar from './components/Navbar';
 import './index.css'
 
-
-
-
 function App() {
-
   return (
-    <div className='bg-tan h-screen w-screen font-Jost'>
-      <div>
+    <div className='bg-tan min-h-screen w-full font-Jost overflow-x-hidden'>
+      <div className='flex flex-col min-h-screen'>
         <Navbar />
-        <RouterProvider router={router} />
-      </div >
+        <main className='flex-grow'>
+          <RouterProvider router={router} />
+        </main>
+      </div>
     </div>
   );
 }
