@@ -3,3 +3,4 @@ node_modules
 example.env
 **/**/.env
 **/**/build/
+**/public/assets/Nathan-CV.txt

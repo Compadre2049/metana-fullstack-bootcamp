@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import emailjs from '@emailjs/browser';
 
 function Contact() {
     const [formData, setFormData] = useState({
@@ -10,27 +9,31 @@ function Contact() {
 
     const [status, setStatus] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setStatus('sending');
 
-        emailjs.send(
-            process.env.REACT_APP_EMAILJS_SERVICE_ID,
-            process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
-            formData,
-            process.env.REACT_APP_EMAILJS_PUBLIC_KEY
-        )
-            .then((response) => {
-                console.log('SUCCESS!', response.status, response.text);
+        try {
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
                 setFormData({ from_name: '', from_email: '', message: '' });
                 setStatus('success');
-                setTimeout(() => setStatus(''), 3000);
-            })
-            .catch((err) => {
-                console.log('FAILED...', err);
+            } else {
                 setStatus('error');
-                setTimeout(() => setStatus(''), 3000);
-            });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            setStatus('error');
+        }
+
+        setTimeout(() => setStatus(''), 3000);
     };
 
     const handleChange = (e) => {
