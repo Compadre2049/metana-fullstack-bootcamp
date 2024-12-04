@@ -4,3 +4,4 @@ example.env
 **/**/.env
 **/**/build/
 **/public/assets/Nathan-CV.txt
+**/server/__tests__/
