@@ -12,6 +12,17 @@ const UserSchema = new mongoose.Schema(
       required: true,
       unique: true,
       lowercase: true,
+      index: true,
+      validate: {
+        validator: async function (email) {
+          if (this.isNew || this.isModified('email')) {
+            const user = await this.constructor.findOne({ email });
+            return !user;
+          }
+          return true;
+        },
+        message: 'Email already exists'
+      }
     },
     password: {
       type: String,
@@ -26,17 +37,6 @@ const UserSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
-);
-
-// Define the index at schema level instead of using pre-save hook
-UserSchema.index(
-  { email: 1 },
-  {
-    unique: true,
-    collation: { locale: 'en', strength: 2 },
-    background: true,
-    name: 'email_unique_custom'  // Custom name to avoid conflicts
   }
 );
 

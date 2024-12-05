@@ -1,6 +1,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import CreateBlog from '../pages/CreateBlog';
+import { useAuth } from '../context/AuthContext';
+
+// Mock AuthContext
+jest.mock('../context/AuthContext', () => ({
+    useAuth: jest.fn()
+}));
 
 // Mock react-router-dom's useNavigate
 const mockNavigate = jest.fn();
@@ -11,12 +17,16 @@ jest.mock('react-router-dom', () => ({
 
 describe('CreateBlog Component', () => {
     beforeEach(() => {
-        // Reset mocks
         jest.clearAllMocks();
         global.fetch = jest.fn();
         localStorage.clear();
         localStorage.setItem('token', 'fake-token');
         process.env.REACT_APP_BACKEND_ORIGIN = 'http://localhost:3000';
+
+        // Mock authenticated user for all tests
+        useAuth.mockImplementation(() => ({
+            isAuthenticated: true
+        }));
     });
 
     test('renders create blog form', () => {
@@ -27,23 +37,20 @@ describe('CreateBlog Component', () => {
         );
 
         expect(screen.getByText('Create New Blog Post')).toBeInTheDocument();
-        expect(screen.getByLabelText('Title')).toBeInTheDocument();
-        expect(screen.getByLabelText('Content')).toBeInTheDocument();
+        expect(screen.getByLabelText(/Title/)).toBeInTheDocument();
+        expect(screen.getByLabelText(/Content/)).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Create Post' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
     });
 
     test('handles form submission successfully', async () => {
-        const mockBlog = {
-            _id: '123',
-            title: 'Test Blog',
-            content: 'Test content'
-        };
-
         global.fetch.mockImplementationOnce(() =>
             Promise.resolve({
                 ok: true,
-                json: () => Promise.resolve(mockBlog)
+                json: () => Promise.resolve({
+                    success: true,
+                    data: { _id: '123' }
+                })
             })
         );
 
@@ -53,18 +60,15 @@ describe('CreateBlog Component', () => {
             </BrowserRouter>
         );
 
-        // Fill out the form
-        fireEvent.change(screen.getByLabelText('Title'), {
+        fireEvent.change(screen.getByLabelText(/Title/), {
             target: { value: 'Test Blog' }
         });
-        fireEvent.change(screen.getByLabelText('Content'), {
+        fireEvent.change(screen.getByLabelText(/Content/), {
             target: { value: 'Test content' }
         });
 
-        // Submit the form
         fireEvent.click(screen.getByRole('button', { name: 'Create Post' }));
 
-        // Check if fetch was called with correct data
         await waitFor(() => {
             expect(global.fetch).toHaveBeenCalledWith(
                 'http://localhost:3000/api/blogs',
@@ -74,6 +78,7 @@ describe('CreateBlog Component', () => {
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer fake-token'
                     },
+                    credentials: 'include',
                     body: JSON.stringify({
                         title: 'Test Blog',
                         content: 'Test content'
@@ -82,15 +87,17 @@ describe('CreateBlog Component', () => {
             );
         });
 
-        // Check if navigation occurred
-        expect(mockNavigate).toHaveBeenCalledWith('/blogs/123');
+        expect(mockNavigate).toHaveBeenCalledWith('/blogs');
     });
 
     test('handles form submission error', async () => {
         global.fetch.mockImplementationOnce(() =>
             Promise.resolve({
                 ok: false,
-                status: 400
+                json: () => Promise.resolve({
+                    success: false,
+                    message: 'Failed to create blog post'
+                })
             })
         );
 
@@ -100,24 +107,34 @@ describe('CreateBlog Component', () => {
             </BrowserRouter>
         );
 
-        // Fill out the form
-        fireEvent.change(screen.getByLabelText('Title'), {
+        fireEvent.change(screen.getByLabelText(/Title/), {
             target: { value: 'Test Blog' }
         });
-        fireEvent.change(screen.getByLabelText('Content'), {
+        fireEvent.change(screen.getByLabelText(/Content/), {
             target: { value: 'Test content' }
         });
 
-        // Submit the form
         fireEvent.click(screen.getByRole('button', { name: 'Create Post' }));
 
-        // Check if error message appears
         await waitFor(() => {
             expect(screen.getByText('Failed to create blog post')).toBeInTheDocument();
         });
 
-        // Check if navigation didn't occur
         expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    test('redirects to login when not authenticated', () => {
+        useAuth.mockImplementation(() => ({
+            isAuthenticated: false
+        }));
+
+        render(
+            <BrowserRouter>
+                <CreateBlog />
+            </BrowserRouter>
+        );
+
+        expect(mockNavigate).toHaveBeenCalledWith('/login');
     });
 
     test('cancel button navigates back to blogs', () => {
@@ -132,13 +149,15 @@ describe('CreateBlog Component', () => {
     });
 
     test('shows loading state during submission', async () => {
-        // Mock a delayed response
         global.fetch.mockImplementationOnce(() =>
             new Promise(resolve =>
                 setTimeout(() =>
                     resolve({
                         ok: true,
-                        json: () => Promise.resolve({ _id: '123' })
+                        json: () => Promise.resolve({
+                            success: true,
+                            data: { _id: '123' }
+                        })
                     }), 100)
             )
         );
@@ -149,22 +168,18 @@ describe('CreateBlog Component', () => {
             </BrowserRouter>
         );
 
-        // Fill out and submit the form
-        fireEvent.change(screen.getByLabelText('Title'), {
+        fireEvent.change(screen.getByLabelText(/Title/), {
             target: { value: 'Test Blog' }
         });
-        fireEvent.change(screen.getByLabelText('Content'), {
+        fireEvent.change(screen.getByLabelText(/Content/), {
             target: { value: 'Test content' }
         });
         fireEvent.click(screen.getByRole('button', { name: 'Create Post' }));
 
-        // Check loading state
-        expect(screen.getByText('Creating...')).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Creating...' })).toBeDisabled();
 
-        // Wait for submission to complete
         await waitFor(() => {
-            expect(mockNavigate).toHaveBeenCalledWith('/blogs/123');
+            expect(mockNavigate).toHaveBeenCalledWith('/blogs');
         });
     });
 }); 

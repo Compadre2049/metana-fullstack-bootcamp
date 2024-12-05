@@ -5,3 +5,10 @@ example.env
 **/**/build/
 **/public/assets/Nathan-CV.txt
 **/server/__tests__/
+**/node_modules
+**/**/node_modules
+**/example.env
+**/**/.env
+**/.env
+node_modules/
+**/build/

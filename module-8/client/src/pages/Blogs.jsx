@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 function Blogs() {
     const [blogs, setBlogs] = useState([]);
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetch(`${process.env.REACT_APP_BACKEND_ORIGIN}/api/blogs`)
@@ -15,15 +16,35 @@ function Blogs() {
                 }
                 return response.json();
             })
-            .then(data => setBlogs(data))
+            .then(data => {
+                setBlogs(data);
+                setLoading(false);
+            })
             .catch(error => {
                 console.error('Error fetching blogs:', error);
                 setError(error.message);
+                setLoading(false);
             });
     }, []);
 
-    if (error) return <div>Error: {error}</div>;
-    if (blogs.length === 0) return <div>Loading...</div>;
+    if (error) return (
+        <div className="text-red-500 text-center py-8">
+            Error: {error}
+        </div>
+    );
+
+    if (loading) return (
+        <div className="text-gray-500 text-center py-8">
+            Loading blogs...
+        </div>
+    );
+
+    if (blogs.length === 0) return (
+        <div className="text-center py-8">
+            <p className="text-gray-600 mb-4">No blogs available at the moment.</p>
+            <p className="text-sm text-gray-500">Check back later for new content!</p>
+        </div>
+    );
 
     return (
         <div>

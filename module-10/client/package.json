@@ -5,7 +5,6 @@
   "proxy": "http://localhost:3001",
   "dependencies": {
     "all": "^0.0.0",
-    "axios": "^1.7.7",
     "dotenv": "^16.4.5",
     "http-proxy-middleware": "^3.0.3",
     "jwt-decode": "^4.0.0",
@@ -22,7 +21,9 @@
     "eject": "react-scripts eject",
     "start:backend": "cd ../server && npm run start:backend",
     "dev": "concurrently \"npm start\" \"npm run start:backend\"",
-    "build:css": "tailwindcss build src/index.css -o src/styles/output.css"
+    "build:css": "tailwindcss build src/index.css -o src/styles/output.css",
+    "test:unit": "jest --config=jest.config.js --detectOpenHandles --forceExit",
+    "test:selenium": "jest --config=jest.selenium.config.js --detectOpenHandles --forceExit"
   },
   "eslintConfig": {
     "extends": [
@@ -49,11 +50,40 @@
     "@testing-library/jest-dom": "^6.6.2",
     "@testing-library/react": "^16.0.1",
     "@testing-library/user-event": "^14.5.2",
+    "@types/selenium-webdriver": "^4.1.27",
     "autoprefixer": "^10.4.20",
+    "axios": "^1.7.7",
     "babel-jest": "^29.7.0",
+    "chromedriver": "^130.0.0",
     "concurrently": "^9.0.1",
     "identity-obj-proxy": "^3.0.0",
+    "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.4.47",
+    "selenium-webdriver": "^4.18.1",
     "tailwindcss": "^3.4.14"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": [
+      "@testing-library/jest-dom",
+      "<rootDir>/src/__tests__/setup.js"
+    ],
+    "moduleNameMapper": {
+      "\\.(css|less|scss|sass)$": "identity-obj-proxy",
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
+    "transform": {
+      "^.+\\.(js|jsx)$": "babel-jest"
+    },
+    "testMatch": [
+      "<rootDir>/src/__tests__/**/*.test.js"
+    ],
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ],
+    "testEnvironmentOptions": {
+      "url": "http://localhost:3000"
+    }
   }
 }

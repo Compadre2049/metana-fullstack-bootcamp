@@ -5,20 +5,17 @@ import { useAuth } from '../context/AuthContext';
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState(null);
+    const [error, setError] = useState('');
     const navigate = useNavigate();
     const { login } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-
         try {
             await login(email, password);
             navigate('/blogs');
         } catch (error) {
-            console.error('Login error:', error);
-            setError(error.message || 'Login failed');
+            setError(error.response?.data?.message || 'Invalid email or password');
         }
     };
 
@@ -32,7 +29,11 @@ function Login() {
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     {error && (
-                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                        <div
+                            className="error alert-error error-message"
+                            role="alert"
+                            data-testid="error-message"
+                        >
                             {error}
                         </div>
                     )}
